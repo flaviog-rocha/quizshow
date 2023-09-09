@@ -1,4 +1,4 @@
-import React, { useContext, useState, createContext, useEffect } from 'react'
+import React, { useContext, useState, createContext, useEffect, useRef } from 'react'
 import './App.css';
 import questions from './questions';
 
@@ -47,19 +47,20 @@ function Reward ({Result, Prize}) {
   return (
     <>
       <div>
-        <div className='Reward-Label'>{Result}:</div>
-        <div className='Reward'>{Prize}</div>
+        <div className={`Reward-Label ${Prize == 0 ? 'Invisible-Reward' : '' }`}>{Result}:</div>
+        <div className={`Reward ${Prize == 0 ? 'Invisible-Reward' : '' }`}>{Prize}</div>
       </div>
     </>
   )
 }
 
 function App() {
-  let [choicedOption, setChoicedOption] = useState(0);
-  let [result, setResult] = useState("");
-  let [runningGame, setRunningGame] = useState(true);
-  let [currentQuestion, setCurrentQuestion] = useState(Math.floor(Math.random()*questions.length));
-  let answeredQuestions = [];
+  const [choicedOption, setChoicedOption] = useState(0);
+  const [result, setResult] = useState("");
+  const [runningGame, setRunningGame] = useState(true);
+  const [currentQuestion, setCurrentQuestion] = useState(Math.floor(Math.random()*questions.length));
+  const [numberQuestion, setNumberQuestion] = useState(0);
+  const answeredQuestions = useRef([]);
 
   const verifyCorrectAnswer = (question) => {
     for (let key in question){
@@ -74,21 +75,47 @@ function App() {
   const defineNextQuestion = (pastQuestions) => {
     let nextQuestion = 0;
 
-    // do {
-    //   nextQuestion = Math.floor(Math.random()*questions.length)
-    // }
-    // while (!pastQuestions.includes(nextQuestion));
+    do {
+      nextQuestion = Math.floor(Math.random()*questions.length)
+    }
+    while (pastQuestions.includes(nextQuestion));
 
     return nextQuestion;
   }
 
-  // if (currentQuestion === -1){
-  //   const nextQuestion = defineNextQuestion(answeredQuestions);
+  const defineReward = (numberQuestion) => {
+    if (numberQuestion === -1)
+      return 0;
 
-  //   answeredQuestions = [...answeredQuestions, nextQuestion];
-  //   setCurrentQuestion(nextQuestion);
-  // }
+    else {
+      let reward = (numberQuestion%5+1)*10**(Math.floor(numberQuestion/5)+3)
+      if (reward % 1000 !== 0){
+        const formatter = new Intl.NumberFormat('pt-BR');
+        return formatter.format(reward);
+      }
+      
+      return reward;
+    }
+  }
 
+  const formatReward = (reward) => {
+    if (reward !== 0 && reward/1000 >= 1) {
+      if (reward % 1000 !== 0){
+        const formatter = new Intl.NumberFormat('pt-BR');
+        return formatter.format(reward);
+      }
+
+      else if (reward === 1000000) {
+        return "1 milhão"
+      }
+      else {
+        return `${reward/1000} mil`
+      }
+    }
+
+    return reward;
+  }
+  
   correctAnswer = verifyCorrectAnswer(questions[currentQuestion]);
   useEffect(() => {
     if (choicedOption !== 0 && runningGame){
@@ -101,6 +128,20 @@ function App() {
               option: choicedOption,
               final: "Correct"
             });
+
+            if (numberQuestion < 15){
+              setTimeout(() => {
+                setChoicedOption(0);
+                setResult("");
+                setCurrentQuestion(defineNextQuestion(answeredQuestions.current));
+                setNumberQuestion(numberQuestion + 1);
+              }, 3000)
+            }
+
+            else {
+              alert("Parabéns, você acaba de ganhar 1 milhão de irreais!");
+              setRunningGame(false)
+            }
           }
 
           else {
@@ -119,16 +160,21 @@ function App() {
       }, 50)
     }
     
-  }, [choicedOption, runningGame])
+  }, [choicedOption, runningGame, numberQuestion])
 
   useEffect(() => {
     if (!runningGame){
       // Espera um tempo até que as alternativas sejam coloridas, para então mostrar a mensagem.
       setTimeout(() => {
-        alert(`Que pena, você perdeu! Levou para a casa 500 irreais!`)
+        alert(`Que pena, você perdeu! Levou para a casa ${formatReward(defineReward(numberQuestion-1)/2)} irreais!`)
       }, 100)
     }
-  }, [runningGame]);
+  }, [runningGame, numberQuestion]);
+
+  useEffect(() => {
+    answeredQuestions.current.push(currentQuestion)
+    console.log(answeredQuestions)
+  }, [currentQuestion])
   
   return (
     <Context.Provider value={[choicedOption, setChoicedOption]}>
@@ -139,9 +185,9 @@ function App() {
         <Answer optionNumber={3} answerResult={result} playable={runningGame} alternative={questions[currentQuestion].option3} />
         <Answer optionNumber={4} answerResult={result} playable={runningGame} alternative={questions[currentQuestion].option4} />
         <div className='Rewards-Area'>
-          <Reward Result={'Errar'} Prize={'500'}/>
-          <Reward Result={'Parar'} Prize={'1 mil'}/>
-          <Reward Result={'Acertar'} Prize={'2 mil'}/>
+          <Reward Result={'Errar'} Prize={`${numberQuestion === 15 ? 'Perde Tudo' : formatReward(defineReward(numberQuestion-1)/2)}`}/>
+          <Reward Result={'Parar'} Prize={formatReward(defineReward(numberQuestion-1))}/>
+          <Reward Result={'Acertar'} Prize={formatReward(defineReward(numberQuestion))}/>
         </div>
       </div>
     </Context.Provider>

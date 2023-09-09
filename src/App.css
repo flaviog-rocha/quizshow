@@ -97,3 +97,7 @@ Body{
 .Wrong {
   background-color: #D05767;
 }
+
+.Invisible-Reward {
+  visibility: hidden;
+}
