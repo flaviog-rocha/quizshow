@@ -1,38 +1,99 @@
-.App {
-  text-align: center;
+@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,400;1,900&display=swap');
+
+:root{
+  --question-width: 600px;
+  --quiz-margin: 18px;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+Body{
+  background-image: linear-gradient(135deg, #2E294E , #554C91);
+  font-family: 'Roboto';
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+.Question-Area, .Answers, .Answer-Option {
+  background-color: #E7D9EA;
+  padding: 10px;
+  box-shadow: 2px 2px 10px rgba(255, 255, 255, 0.2);
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+.Answers, .Answer-Option {
+  height: 50px;
   display: flex;
-  flex-direction: column;
   align-items: center;
+  user-select: none;
+}
+
+.Question-Area, .Answers {
+  border-radius: 15px;
+  font-size: 1.3rem;
+}
+
+.Answer-Component, .Rewards-Area{
+  display: flex;
+  justify-content: space-between;
+  width: var(--question-width);
+}
+
+.Question-Area {
+  width: var(--question-width);
+  height: 200px;
+  margin-bottom: var(--quiz-margin);
+  box-sizing: border-box;
+  line-height: 1.8rem;
+}
+
+.Answers {
+  width: 480px;
+}
+
+.Answer-Option{
+  width: 50px;
+  border-radius: 100%;;
+  margin-right: 10px;
+  font-size: 1.8rem;
   justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  color: #2E294E;
+  font-weight: 900;
+  cursor: pointer;
 }
 
-.App-link {
-  color: #61dafb;
+.Reward-Label {
+  font-weight: 900;
+  color: #FFF;
+  font-size: 1.1rem;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.Reward {
+  background-image: linear-gradient(45deg, rgb(63, 63, 34) , rgb(190, 190, 11));
+  font-size: 1.3rem;
+  width: 120px;
+  height: 50px;
+  border-radius: 5px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 10px;
+  color: #FFF;
+  font-weight: 900;
+  box-shadow: 2px 2px 10px rgba(255, 255, 255, 0.2);
+}
+
+.Answer-Component{
+  margin: var(--quiz-margin) 0;
+}
+
+.Rewards-Area{
+  margin-top: 30px
+}
+
+.Clicked {
+  background-color: #FFC759;
+}
+
+.Correct {
+  background-color: #85FF9E;
+}
+
+.Wrong {
+  background-color: #D05767;
 }
