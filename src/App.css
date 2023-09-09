@@ -16,10 +16,14 @@ Body{
   box-shadow: 2px 2px 10px rgba(255, 255, 255, 0.2);
 }
 
-.Answers, .Answer-Option {
-  height: 50px;
+.Answers, .Answer-Option, .Question-Area{
   display: flex;
   align-items: center;
+
+}
+
+.Answers, .Answer-Option {
+  height: 50px;
   user-select: none;
 }
 
@@ -36,7 +40,7 @@ Body{
 
 .Question-Area {
   width: var(--question-width);
-  height: 200px;
+  height: 120px;
   margin-bottom: var(--quiz-margin);
   box-sizing: border-box;
   line-height: 1.8rem;
@@ -96,4 +100,8 @@ Body{
 
 .Wrong {
   background-color: #D05767;
+}
+
+.Invisible-Reward {
+  visibility: hidden;
 }
