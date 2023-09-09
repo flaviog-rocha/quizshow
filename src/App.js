@@ -10,11 +10,15 @@ function Question({ statement }){
   )
 }
 
-function Answer({ optionNumber, alternative, answerResult }){
+function Answer({ optionNumber, alternative, answerResult, playable }){
   let [choicedOption, setChoicedOption] = useContext(Context);
 
   const optionClass = () => {
-    if (!answerResult && choicedOption === optionNumber){
+    if (answerResult.final === "Wrong" && optionNumber === correctAnswer){
+      return "Correct"
+    }
+
+    else if (!answerResult && choicedOption === optionNumber && playable){
       return 'Clicked';
     }
 
@@ -26,18 +30,12 @@ function Answer({ optionNumber, alternative, answerResult }){
       return answerResult.final;
     }
   }
-  const onClickOption = () => {
-    setChoicedOption(optionNumber);
-    // setTimeout(() => {
-      
-    // }, 1000)
-    
-  }
+
   return (
     <>
       <div className='Answer-Component'>
-        <div className={`Answer-Option ${optionClass()}`} onClick={onClickOption}>{optionNumber}</div>
-        <div className={`Answers ${answerResult.option === optionNumber ? answerResult.final : ''}`}>{alternative}</div>
+        <div className={`Answer-Option ${optionClass()}`} onClick={() => setChoicedOption(optionNumber)}>{optionNumber}</div>
+        <div className={`Answers ${optionClass() === 'Clicked' ? '' : optionClass()}`}>{alternative}</div>
       </div>
     </>
 
@@ -58,9 +56,10 @@ function Reward ({Result, Prize}) {
 function App() {
   let [choicedOption, setChoicedOption] = useState(0);
   let [result, setResult] = useState("");
+  let [runningGame, setRunningGame] = useState(true);
 
   useEffect(() => {
-    if (choicedOption !== 0){
+    if (choicedOption !== 0 && runningGame){
       // Como a aparição da cor na opção selecionada sofre um pequeno delay, é colocado este setTimeout para esperar até que a
       // cor amarela seja devidamente colocada na resposta.
       setTimeout(() => { 
@@ -77,6 +76,8 @@ function App() {
               option: choicedOption,
               final: "Wrong"
             })
+            
+            setRunningGame(false)
           }
         }
   
@@ -86,15 +87,25 @@ function App() {
       }, 50)
     }
     
-  }, [choicedOption])
+  }, [choicedOption, runningGame])
+
+  useEffect(() => {
+    if (!runningGame){
+      // Espera um tempo até que as alternativas sejam coloridas, para então mostrar a mensagem.
+      setTimeout(() => {
+        alert(`Que pena, você perdeu! Levou para a casa 500 reais fictícios!`)
+      }, 100)
+    }
+  }, [runningGame]);
+  
   return (
-    <Context.Provider value={[choicedOption, setChoicedOption, result, setResult]}>
+    <Context.Provider value={[choicedOption, setChoicedOption]}>
       <div style={{display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '100vh'}}>
         <Question statement={"Qual é o planeta do sistema solar que fica mais próximo do Sol?"}/>
-        <Answer optionNumber={1} answerResult={result} alternative={'Vênus'}/>
-        <Answer optionNumber={2} answerResult={result} alternative={'Mercúrio'}/>
-        <Answer optionNumber={3} answerResult={result} alternative={'Júpiter'}/>
-        <Answer optionNumber={4} answerResult={result} alternative={'Netuno'}/>
+        <Answer optionNumber={1} answerResult={result} alternative={'Vênus'} playable={runningGame}/>
+        <Answer optionNumber={2} answerResult={result} alternative={'Mercúrio'} playable={runningGame}/>
+        <Answer optionNumber={3} answerResult={result} alternative={'Júpiter'} playable={runningGame}/>
+        <Answer optionNumber={4} answerResult={result} alternative={'Netuno'} playable={runningGame}/>
         <div className='Rewards-Area'>
           <Reward Result={'Errar'} Prize={'500'}/>
           <Reward Result={'Parar'} Prize={'1 mil'}/>
