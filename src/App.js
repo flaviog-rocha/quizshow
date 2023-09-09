@@ -55,20 +55,39 @@ function Reward ({Result, Prize}) {
 }
 
 function App() {
+  let [choicedOption, setChoicedOption] = useState(0);
+  let [result, setResult] = useState("");
+  let [runningGame, setRunningGame] = useState(true);
+  let [currentQuestion, setCurrentQuestion] = useState(Math.floor(Math.random()*questions.length));
+  let answeredQuestions = [];
+
   const verifyCorrectAnswer = (question) => {
     for (let key in question){
-      if (key !== 'correct' && key !== 'question' && question[key] === question.correct){
-        return key.slice(-1);
+      if (key.includes("option") && question[key] === question.correct){
+        return parseInt(key.slice(-1));
       }
     }
 
     return 0;
   }
 
-  let [choicedOption, setChoicedOption] = useState(0);
-  let [result, setResult] = useState("");
-  let [runningGame, setRunningGame] = useState(true);
-  let [currentQuestion, setCurrentQuestion] = useState(parseInt(Math.random()*1000%questions.length));
+  const defineNextQuestion = (pastQuestions) => {
+    let nextQuestion = 0;
+
+    // do {
+    //   nextQuestion = Math.floor(Math.random()*questions.length)
+    // }
+    // while (!pastQuestions.includes(nextQuestion));
+
+    return nextQuestion;
+  }
+
+  // if (currentQuestion === -1){
+  //   const nextQuestion = defineNextQuestion(answeredQuestions);
+
+  //   answeredQuestions = [...answeredQuestions, nextQuestion];
+  //   setCurrentQuestion(nextQuestion);
+  // }
 
   correctAnswer = verifyCorrectAnswer(questions[currentQuestion]);
   useEffect(() => {
@@ -106,7 +125,7 @@ function App() {
     if (!runningGame){
       // Espera um tempo até que as alternativas sejam coloridas, para então mostrar a mensagem.
       setTimeout(() => {
-        alert(`Que pena, você perdeu! Levou para a casa 500 reais fictícios!`)
+        alert(`Que pena, você perdeu! Levou para a casa 500 irreais!`)
       }, 100)
     }
   }, [runningGame]);
