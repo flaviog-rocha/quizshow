@@ -57,7 +57,7 @@ function Reward ({Result, Prize}) {
 function App() {
   const [choicedOption, setChoicedOption] = useState(0);
   const [result, setResult] = useState("");
-  const [runningGame, setRunningGame] = useState(true);
+  const [runningGame, setRunningGame] = useState("Running");
   const [currentQuestion, setCurrentQuestion] = useState(Math.floor(Math.random()*questions.length));
   const [numberQuestion, setNumberQuestion] = useState(0);
   const answeredQuestions = useRef([]);
@@ -118,7 +118,7 @@ function App() {
   
   correctAnswer = verifyCorrectAnswer(questions[currentQuestion]);
   useEffect(() => {
-    if (choicedOption !== 0 && runningGame){
+    if (choicedOption !== 0 && runningGame === "Running"){
       // Como a aparição da cor na opção selecionada sofre um pequeno delay, é colocado este setTimeout para esperar até que a
       // cor amarela seja devidamente colocada na resposta.
       setTimeout(() => { 
@@ -139,8 +139,7 @@ function App() {
             }
 
             else {
-              alert("Parabéns, você acaba de ganhar 1 milhão de irreais!");
-              setRunningGame(false)
+              setRunningGame("Win")
             }
           }
 
@@ -150,7 +149,7 @@ function App() {
               final: "Wrong"
             })
             
-            setRunningGame(false)
+            setRunningGame("Lose")
           }
         }
   
@@ -163,10 +162,16 @@ function App() {
   }, [choicedOption, runningGame, numberQuestion])
 
   useEffect(() => {
-    if (!runningGame){
+    if (runningGame === "Lose"){
       // Espera um tempo até que as alternativas sejam coloridas, para então mostrar a mensagem.
       setTimeout(() => {
-        alert(`Que pena, você perdeu! Levou para a casa ${formatReward(defineReward(numberQuestion-1)/2)} irreais!`)
+        alert(`Que pena, você perdeu! Levou para a casa ${numberQuestion === 15 ? 0 : formatReward(defineReward(numberQuestion-1)/2)} irreais!`);
+      }, 100)
+    }
+
+    else if (runningGame === "Win"){
+      setTimeout(() => {
+        alert("Parabéns, você acaba de ganhar 1 milhão de irreais!");
       }, 100)
     }
   }, [runningGame, numberQuestion]);
@@ -180,10 +185,10 @@ function App() {
     <Context.Provider value={[choicedOption, setChoicedOption]}>
       <div style={{display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '100vh'}}>
         <Question statement={questions[currentQuestion].question}/>
-        <Answer optionNumber={1} answerResult={result} playable={runningGame} alternative={questions[currentQuestion].option1} />
-        <Answer optionNumber={2} answerResult={result} playable={runningGame} alternative={questions[currentQuestion].option2} />
-        <Answer optionNumber={3} answerResult={result} playable={runningGame} alternative={questions[currentQuestion].option3} />
-        <Answer optionNumber={4} answerResult={result} playable={runningGame} alternative={questions[currentQuestion].option4} />
+        <Answer optionNumber={1} answerResult={result} playable={runningGame === "Running"} alternative={questions[currentQuestion].option1} />
+        <Answer optionNumber={2} answerResult={result} playable={runningGame === "Running"} alternative={questions[currentQuestion].option2} />
+        <Answer optionNumber={3} answerResult={result} playable={runningGame === "Running"} alternative={questions[currentQuestion].option3} />
+        <Answer optionNumber={4} answerResult={result} playable={runningGame === "Running"} alternative={questions[currentQuestion].option4} />
         <div className='Rewards-Area'>
           <Reward Result={'Errar'} Prize={`${numberQuestion === 15 ? 'Perde Tudo' : formatReward(defineReward(numberQuestion-1)/2)}`}/>
           <Reward Result={'Parar'} Prize={formatReward(defineReward(numberQuestion-1))}/>
