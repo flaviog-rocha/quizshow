@@ -1,5 +1,6 @@
 import React, { useContext, useState, createContext, useEffect } from 'react'
 import './App.css';
+import questions from './questions';
 
 const Context = createContext(0);
 let correctAnswer = 2;
@@ -54,10 +55,22 @@ function Reward ({Result, Prize}) {
 }
 
 function App() {
+  const verifyCorrectAnswer = (question) => {
+    for (let key in question){
+      if (key !== 'correct' && key !== 'question' && question[key] === question.correct){
+        return key.slice(-1);
+      }
+    }
+
+    return 0;
+  }
+
   let [choicedOption, setChoicedOption] = useState(0);
   let [result, setResult] = useState("");
   let [runningGame, setRunningGame] = useState(true);
+  let [currentQuestion, setCurrentQuestion] = useState(parseInt(Math.random()*1000%questions.length));
 
+  correctAnswer = verifyCorrectAnswer(questions[currentQuestion]);
   useEffect(() => {
     if (choicedOption !== 0 && runningGame){
       // Como a aparição da cor na opção selecionada sofre um pequeno delay, é colocado este setTimeout para esperar até que a
@@ -101,11 +114,11 @@ function App() {
   return (
     <Context.Provider value={[choicedOption, setChoicedOption]}>
       <div style={{display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '100vh'}}>
-        <Question statement={"Qual é o planeta do sistema solar que fica mais próximo do Sol?"}/>
-        <Answer optionNumber={1} answerResult={result} alternative={'Vênus'} playable={runningGame}/>
-        <Answer optionNumber={2} answerResult={result} alternative={'Mercúrio'} playable={runningGame}/>
-        <Answer optionNumber={3} answerResult={result} alternative={'Júpiter'} playable={runningGame}/>
-        <Answer optionNumber={4} answerResult={result} alternative={'Netuno'} playable={runningGame}/>
+        <Question statement={questions[currentQuestion].question}/>
+        <Answer optionNumber={1} answerResult={result} playable={runningGame} alternative={questions[currentQuestion].option1} />
+        <Answer optionNumber={2} answerResult={result} playable={runningGame} alternative={questions[currentQuestion].option2} />
+        <Answer optionNumber={3} answerResult={result} playable={runningGame} alternative={questions[currentQuestion].option3} />
+        <Answer optionNumber={4} answerResult={result} playable={runningGame} alternative={questions[currentQuestion].option4} />
         <div className='Rewards-Area'>
           <Reward Result={'Errar'} Prize={'500'}/>
           <Reward Result={'Parar'} Prize={'1 mil'}/>
