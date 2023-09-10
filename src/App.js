@@ -19,9 +19,6 @@ function Answer({ optionNumber, alternative, answerResult, playable }) {
   let [choicedOption, setChoicedOption] = useContext(Context);
 
   const optionClass = () => {
-    console.log(`Answer Result: ${answerResult}`);
-    console.log(`Choiced Option: ${choicedOption}`);
-    console.log(`Option Number: ${optionNumber}`);
     if (answerResult.final === "Wrong" && optionNumber === correctAnswer) {
       return "Correct";
     } else if (!answerResult && choicedOption === optionNumber) {
@@ -42,7 +39,6 @@ function Answer({ optionNumber, alternative, answerResult, playable }) {
         <div
           className={`Answer-Option ${optionClass()}`}
           onClick={() => {
-            console.log(playable);
             if (playable) {
               setChoicedOption(optionNumber);
             }
@@ -77,6 +73,40 @@ function Reward({ Result, Prize }) {
   );
 }
 
+function TimeRemain({remainTime}){
+  return (
+    <>
+      <div className="Time-Counter-Max">
+        <div style={{ height: `${remainTime/45*100}%`}} className="Time-Counter-Remain"></div>
+      </div>
+      <div className="Time-Counter-Label">
+        {remainTime}
+      </div>
+    </>
+  )
+}
+
+// function QuestionModal(){
+//   return (
+    
+//   )
+// }
+
+function Modal({message, mainButton, secondaryButton, active}){
+  return (
+    <>
+      <div className="Modal-Background" style={{display: `${active ? "flex" : "none"}`}}>
+        <div className="Question-Modal">
+          <div style={{textAlign: "center", fontSize: "1.05rem"}}>{message}</div>
+          <div style={{display: 'flex', flexDirection: 'row-reverse'}}>
+            <button className="Modal-Main-Button">{mainButton}</button>
+            <button className="Modal-Secondary-Button" style={{visibility: `${secondaryButton ? 'visible' : 'hidden'}`}}>{secondaryButton}</button>
+          </div>
+        </div>
+      </div>
+    </>
+  )
+}
 function App() {
   const [choicedOption, setChoicedOption] = useState(0);
   const [result, setResult] = useState("");
@@ -93,6 +123,7 @@ function App() {
     "Skip",
     "Skip",
   ]);
+  let [time, setTime] = useState(45);
   const answeredQuestions = useRef([]);
 
   const verifyCorrectAnswer = (question) => {
@@ -106,9 +137,8 @@ function App() {
   };
 
   const defineNextQuestion = (pastQuestions) => {
-    console.log("Oi");
     let nextQuestion = 0;
-
+    setTime(45)
     do {
       nextQuestion = Math.floor(Math.random() * questions.length);
     } while (pastQuestions.includes(nextQuestion));
@@ -252,8 +282,30 @@ function App() {
     answeredQuestions.current.push(currentQuestion);
   }, [currentQuestion]);
 
+  useEffect(() => {
+    if (numberQuestion === 15){
+      setHelps([]);
+    }
+  }, [numberQuestion])
+
+  useEffect(() => {
+    const updateTimer = setInterval(() => {
+      setTime((prevTime) => {
+        if (prevTime === 0 || runningGame !== "Running") clearInterval(updateTimer)
+
+        if (prevTime === 0) {
+          setRunningGame("Lose");
+        }
+        return (prevTime > 0 && runningGame === "Running") ? prevTime - 1 : prevTime
+      })
+    }, 1000)
+
+    return () => clearInterval(updateTimer)
+  }, [runningGame])
+
   return (
     <Context.Provider value={[choicedOption, setChoicedOption]}>
+      <Modal message={"Deseja realmente pular a pergunta?"} mainButton={"Sim"} secondaryButton={"Não"} />
       <div style={{ display: "flex", alignItems: "center" }}>
         <div
           style={{
@@ -318,12 +370,13 @@ function App() {
             alignItems: "center",
           }}
         >
-          <div
+          <TimeRemain remainTime={time}/>
+          {/* <div
             style={{ height: "60vh", width: "15px", backgroundColor: "#FFF" }}
           ></div>
           <div style={{ marginTop: "10px", fontWeight: "900", color: "#FFF" }}>
             45
-          </div>
+          </div> */}
         </div>
         <div
           style={{
