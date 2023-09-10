@@ -115,6 +115,12 @@ function App() {
 
     return reward;
   }
+
+  const stopGame = (reward) => {
+    if (window.confirm(`Você deseja parar e receber ${reward} irreais`)){
+      setRunningGame("Stopped")
+    }
+  }
   
   correctAnswer = verifyCorrectAnswer(questions[currentQuestion]);
   useEffect(() => {
@@ -159,7 +165,7 @@ function App() {
       }, 50)
     }
     
-  }, [choicedOption, runningGame, numberQuestion])
+  }, [choicedOption, runningGame])
 
   useEffect(() => {
     if (runningGame === "Lose"){
@@ -174,6 +180,12 @@ function App() {
         alert("Parabéns, você acaba de ganhar 1 milhão de irreais!");
       }, 100)
     }
+
+    else if (runningGame === "Stopped"){
+      setTimeout(() => {
+        alert(`Parabéns, você parou o jogo e recebeu ${formatReward(defineReward(numberQuestion-1))} irreais`);
+      }, 100)
+    }
   }, [runningGame, numberQuestion]);
 
   useEffect(() => {
@@ -183,16 +195,35 @@ function App() {
   
   return (
     <Context.Provider value={[choicedOption, setChoicedOption]}>
-      <div style={{display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '100vh'}}>
-        <Question statement={questions[currentQuestion].question}/>
-        <Answer optionNumber={1} answerResult={result} playable={runningGame === "Running"} alternative={questions[currentQuestion].option1} />
-        <Answer optionNumber={2} answerResult={result} playable={runningGame === "Running"} alternative={questions[currentQuestion].option2} />
-        <Answer optionNumber={3} answerResult={result} playable={runningGame === "Running"} alternative={questions[currentQuestion].option3} />
-        <Answer optionNumber={4} answerResult={result} playable={runningGame === "Running"} alternative={questions[currentQuestion].option4} />
-        <div className='Rewards-Area'>
-          <Reward Result={'Errar'} Prize={`${numberQuestion === 15 ? 'Perde Tudo' : formatReward(defineReward(numberQuestion-1)/2)}`}/>
-          <Reward Result={'Parar'} Prize={formatReward(defineReward(numberQuestion-1))}/>
-          <Reward Result={'Acertar'} Prize={formatReward(defineReward(numberQuestion))}/>
+      <div style={{display: 'flex'}}>
+        <div style={{display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'end', height: '100vh', width: '55vw'}}>
+          <Question statement={questions[currentQuestion].question}/>
+          <Answer optionNumber={1} answerResult={result} playable={runningGame === "Running"} alternative={questions[currentQuestion].option1} />
+          <Answer optionNumber={2} answerResult={result} playable={runningGame === "Running"} alternative={questions[currentQuestion].option2} />
+          <Answer optionNumber={3} answerResult={result} playable={runningGame === "Running"} alternative={questions[currentQuestion].option3} />
+          <Answer optionNumber={4} answerResult={result} playable={runningGame === "Running"} alternative={questions[currentQuestion].option4} />
+          <div className='Rewards-Area'>
+            <Reward Result={'Errar'} Prize={`${numberQuestion === 15 ? 'Perde Tudo' : formatReward(defineReward(numberQuestion-1)/2)}`}/>
+            <Reward Result={'Parar'} Prize={formatReward(defineReward(numberQuestion-1))}/>
+            <Reward Result={'Acertar'} Prize={formatReward(defineReward(numberQuestion))}/>
+          </div>
+        </div>
+        <div style={{width: '10vw', display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
+          <div style={{height: '75vh', width: '15px', backgroundColor: '#FFF', }}></div>
+        </div>
+        <div style={{ height: '100vh', width: '15vw'}}>
+          <button disabled={numberQuestion === 0 || runningGame !== "Running"} onClick={() => stopGame(formatReward(defineReward(numberQuestion-1)))}>Parar</button>
+          <div>Ajudas</div>
+          <div>
+            <button>Cartas</button>
+            <button>Placas</button>
+            <button>Universitários</button>
+          </div>
+          <div>
+            <button>Pular</button>
+            <button>Pular</button>
+            <button>Pular</button>
+          </div>
         </div>
       </div>
     </Context.Provider>
