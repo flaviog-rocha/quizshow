@@ -10,7 +10,7 @@ Body{
   font-family: 'Roboto';
 }
 
-.Question-Area, .Answers, .Answer-Option {
+.Question-Area, .Answers, .Answer-Option, .Stop-Button, .Help-Button {
   background-color: #E7D9EA;
   padding: 10px;
   box-shadow: 2px 2px 10px rgba(255, 255, 255, 0.2);
@@ -20,6 +20,14 @@ Body{
   display: flex;
   align-items: center;
 
+}
+
+.Answer-Option:hover{
+  background-color: #cec1d1;
+}
+
+.Answer-Option:active{
+  background-color: #c4b8c7;
 }
 
 .Answers, .Answer-Option {
@@ -61,7 +69,7 @@ Body{
   cursor: pointer;
 }
 
-.Reward-Label {
+.Reward-Label, .Help-Label {
   font-weight: 900;
   color: #FFF;
   font-size: 1.1rem;
@@ -91,17 +99,79 @@ Body{
 }
 
 .Clicked {
-  background-color: #FFC759;
+  background-color: #FFC759 !important;
 }
 
 .Correct {
-  background-color: #85FF9E;
+  background-color: #85FF9E !important;
 }
 
 .Wrong {
-  background-color: #D05767;
+  background-color: #D05767 !important;
 }
 
 .Invisible-Reward {
   visibility: hidden;
+}
+
+.Stop-Button {
+  font-weight: 900;
+  width: min-content;
+  font-size: 1.3rem;
+  padding: 10px 20px;
+  margin-right: 20%;
+  background-color: #f3f57f;
+  color: #6e6e39;
+  border-style:none;
+  border-radius: 5px;
+  cursor: pointer;
+  align-self: center;
+}
+
+.Stop-Button:hover{
+  background-color: #dadb7d;
+}
+
+.Stop-Button:active{
+  background-color: #b8b974;
+}
+
+.Stop-Button:disabled{
+  background-color: #7f8067;
+  color: #525246;
+  box-shadow: none;
+  cursor:default
+}
+
+.Help-Button {
+  font-weight: 900;
+  width: 10.5rem;
+  font-size: 1.1rem;
+  padding: 10px 0;
+  margin: 10px 10px 5px 0;
+  background-color: #8ad1fa;
+  color: #104b6d;
+  border-style:none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.Help-Button:hover{
+  background-color: #74b4da;
+}
+
+.Help-Button:active{
+  background-color: #659cbd;
+}
+
+.Help-Button:disabled{
+  background-color: #708694;
+  color: #4a5c66;
+  box-shadow: none;
+  cursor:default
+}
+
+
+.Help-Label {
+  margin-bottom: 10px
 }

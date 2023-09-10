@@ -19,9 +19,12 @@ function Answer({ optionNumber, alternative, answerResult, playable }) {
   let [choicedOption, setChoicedOption] = useContext(Context);
 
   const optionClass = () => {
+    console.log(`Answer Result: ${answerResult}`);
+    console.log(`Choiced Option: ${choicedOption}`);
+    console.log(`Option Number: ${optionNumber}`);
     if (answerResult.final === "Wrong" && optionNumber === correctAnswer) {
       return "Correct";
-    } else if (!answerResult && choicedOption === optionNumber && playable) {
+    } else if (!answerResult && choicedOption === optionNumber) {
       return "Clicked";
     } else if (
       (!answerResult && choicedOption !== optionNumber) ||
@@ -38,7 +41,12 @@ function Answer({ optionNumber, alternative, answerResult, playable }) {
       <div className="Answer-Component">
         <div
           className={`Answer-Option ${optionClass()}`}
-          onClick={() => setChoicedOption(optionNumber)}
+          onClick={() => {
+            console.log(playable);
+            if (playable) {
+              setChoicedOption(optionNumber);
+            }
+          }}
         >
           {optionNumber}
         </div>
@@ -77,6 +85,14 @@ function App() {
     Math.floor(Math.random() * questions.length)
   );
   const [numberQuestion, setNumberQuestion] = useState(0);
+  const [helps, setHelps] = useState([
+    "Cards",
+    "Plates",
+    "Academics",
+    "Skip",
+    "Skip",
+    "Skip",
+  ]);
   const answeredQuestions = useRef([]);
 
   const verifyCorrectAnswer = (question) => {
@@ -90,6 +106,7 @@ function App() {
   };
 
   const defineNextQuestion = (pastQuestions) => {
+    console.log("Oi");
     let nextQuestion = 0;
 
     do {
@@ -134,6 +151,34 @@ function App() {
     }
   };
 
+  const skipQuestion = () => {
+    skipsCounter();
+
+    //if (runningGame === "Running"){
+      if (runningGame === "Running" && window.confirm("Tem certeza que você deseja pular esta pergunta?")) {
+        let helpsCopy = [...helps];
+        helpsCopy.pop();
+        setHelps(helpsCopy);
+        setRunningGame("Interval");
+        setTimeout(() => {
+          setCurrentQuestion(defineNextQuestion(answeredQuestions.current));
+          setRunningGame("Running");
+        }, 1000);
+      }
+    //}
+    
+  };
+
+  const skipsCounter = () => {
+    let counter = 0;
+
+    for (let help of helps) {
+      if (help === "Skip") counter++;
+    }
+
+    return counter;
+  };
+
   correctAnswer = verifyCorrectAnswer(questions[currentQuestion]);
   useEffect(() => {
     if (choicedOption !== 0 && runningGame === "Running") {
@@ -147,6 +192,7 @@ function App() {
               final: "Correct",
             });
 
+            setRunningGame("Interval");
             if (numberQuestion < 15) {
               setTimeout(() => {
                 setChoicedOption(0);
@@ -155,6 +201,7 @@ function App() {
                   defineNextQuestion(answeredQuestions.current)
                 );
                 setNumberQuestion(numberQuestion + 1);
+                setRunningGame("Running");
               }, 3000);
             } else {
               setRunningGame("Win");
@@ -203,12 +250,11 @@ function App() {
 
   useEffect(() => {
     answeredQuestions.current.push(currentQuestion);
-    console.log(answeredQuestions);
   }, [currentQuestion]);
 
   return (
     <Context.Provider value={[choicedOption, setChoicedOption]}>
-      <div style={{ display: "flex" }}>
+      <div style={{ display: "flex", alignItems: "center" }}>
         <div
           style={{
             display: "flex",
@@ -216,7 +262,7 @@ function App() {
             justifyContent: "center",
             alignItems: "end",
             height: "100vh",
-            width: "55vw",
+            width: "50vw",
           }}
         >
           <Question statement={questions[currentQuestion].question} />
@@ -267,16 +313,29 @@ function App() {
           style={{
             width: "10vw",
             display: "flex",
+            flexDirection: "column",
             justifyContent: "center",
             alignItems: "center",
           }}
         >
           <div
-            style={{ height: "75vh", width: "15px", backgroundColor: "#FFF" }}
+            style={{ height: "60vh", width: "15px", backgroundColor: "#FFF" }}
           ></div>
+          <div style={{ marginTop: "10px", fontWeight: "900", color: "#FFF" }}>
+            45
+          </div>
         </div>
-        <div style={{ height: "100vh", width: "15vw" }}>
+        <div
+          style={{
+            height: "60vh",
+            width: "35vw",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "space-evenly",
+          }}
+        >
           <button
+            className="Stop-Button"
             disabled={numberQuestion === 0 || runningGame !== "Running"}
             onClick={() =>
               stopGame(formatReward(defineReward(numberQuestion - 1)))
@@ -284,16 +343,45 @@ function App() {
           >
             Parar
           </button>
-          <div>Ajudas</div>
           <div>
-            <button>Cartas</button>
-            <button>Placas</button>
-            <button>Universitários</button>
-          </div>
-          <div>
-            <button>Pular</button>
-            <button>Pular</button>
-            <button>Pular</button>
+            <div className="Help-Label">Ajudas</div>
+            <div>
+              <button className="Help-Button">Cartas</button>
+              <button className="Help-Button">Placas</button>
+              <button className="Help-Button">Universitários</button>
+            </div>
+            <div>
+              <button
+                className="Help-Button"
+                onClick={skipQuestion}
+                disabled={
+                  skipsCounter() < 1 ||
+                  (runningGame !== "Running" && runningGame !== "Interval")
+                }
+              >
+                Pular
+              </button>
+              <button
+                className="Help-Button"
+                onClick={skipQuestion}
+                disabled={
+                  skipsCounter() < 2 ||
+                  (runningGame !== "Running" && runningGame !== "Interval")
+                }
+              >
+                Pular
+              </button>
+              <button
+                className="Help-Button"
+                onClick={skipQuestion}
+                disabled={
+                  skipsCounter() < 3 ||
+                  (runningGame !== "Running" && runningGame !== "Interval")
+                }
+              >
+                Pular
+              </button>
+            </div>
           </div>
         </div>
       </div>
