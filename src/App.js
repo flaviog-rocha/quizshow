@@ -87,12 +87,6 @@ function TimeRemain({ remainTime }) {
   );
 }
 
-// function QuestionModal(){
-//   return (
-
-//   )
-// }
-
 function Modal({
   message,
   mainButtonMessage,
@@ -208,23 +202,27 @@ function App() {
   };
 
   const stopGame = (reward) => {
-    if (window.confirm(`Você deseja parar e receber ${reward} irreais`)) {
-      setRunningGame("Stopped");
-    }
+    setModalInfo({
+      message: `Você deseja parar e receber ${reward} irreais?`,
+      mainButton: "Sim",
+      secondaryButton: "Cancelar",
+      mainMethod: () => {
+        setRunningGame("Stopped");
+        cancelModal();
+      },
+      secondaryMethod: () => {
+        cancelModal();
+      },
+      backgroundMethod: (e) => {
+        clickOnBackground(e);
+      }
+    })
   };
 
   const skipQuestion = () => {
     if (
       runningGame === "Running"
     ) {
-      // let helpsCopy = [...helps];
-      // helpsCopy.pop();
-      // setHelps(helpsCopy);
-      // setRunningGame("Interval");
-      // setTimeout(() => {
-      //   setCurrentQuestion(defineNextQuestion(answeredQuestions.current));
-      //   setRunningGame("Running");
-      // }, 1000);
       setModalInfo({
         message: "Você tem certeza de que deseja pular a pergunta?",
         mainButton: "Sim",
@@ -321,80 +319,59 @@ function App() {
         mainButton: "Sim",
         secondaryButton: "Não",
         mainMethod: () => {
-          skipQuestionConfirm()
+          confirmAnswer()
         },
         secondaryMethod: () => {
           setChoicedOption(0);
           cancelModal();
         },
-        backgroundMethod: (e) => {
-          setChoicedOption(0);
-          clickOnBackground(e);
-        }
+        backgroundMethod: null,
       })
-      // Como a aparição da cor na opção selecionada sofre um pequeno delay, é colocado este setTimeout para esperar até que a
-      // cor amarela seja devidamente colocada na resposta.
-      // setTimeout(() => {
-      //   if (window.confirm("Você está certo disso?")) {
-      //     // if (choicedOption === correctAnswer) {
-      //     //   setResult({
-      //     //     option: choicedOption,
-      //     //     final: "Correct",
-      //     //   });
-
-      //     //   setRunningGame("Interval");
-      //     //   if (numberQuestion < 15) {
-      //     //     setTimeout(() => {
-      //     //       setChoicedOption(0);
-      //     //       setResult("");
-      //     //       setCurrentQuestion(
-      //     //         defineNextQuestion(answeredQuestions.current)
-      //     //       );
-      //     //       setNumberQuestion(numberQuestion + 1);
-      //     //       setRunningGame("Running");
-      //     //     }, 3000);
-      //     //   } else {
-      //     //     setRunningGame("Win");
-      //     //   }
-      //     // } else {
-      //     //   setResult({
-      //     //     option: choicedOption,
-      //     //     final: "Wrong",
-      //     //   });
-
-      //     //   setRunningGame("Lose");
-      //     // }
-      //   } else {
-      //     setChoicedOption(0);
-      //   }
-      // }, 50);
     }
   }, [choicedOption, runningGame]);
 
   useEffect(() => {
     if (runningGame === "Lose") {
-      // Espera um tempo até que as alternativas sejam coloridas, para então mostrar a mensagem.
-      setTimeout(() => {
-        alert(
-          `Que pena, você perdeu! Levou para a casa ${
-            numberQuestion === 15
-              ? 0
-              : formatReward(defineReward(numberQuestion - 1) / 2)
-          } irreais!`
-        );
-      }, 100);
+      setModalInfo({
+        message: `Que pena, você perdeu! Levou para a casa ${numberQuestion === 15 ? 0 : formatReward(defineReward(numberQuestion - 1) / 2)} irreais!`,
+        mainButton: "Ok",
+        secondaryButton: null,
+        mainMethod: () => {
+          cancelModal();
+        },
+        secondaryMethod: null,
+        backgroundMethod: (e) => {
+          clickOnBackground(e);
+        }
+      })
     } else if (runningGame === "Win") {
-      setTimeout(() => {
-        alert("Parabéns, você acaba de ganhar 1 milhão de irreais!");
-      }, 100);
+      setModalInfo({
+        message: `Parabéns! Você acaba de ganhar 1 milhão de irreais!`,
+        mainButton: "Ok",
+        secondaryButton: null,
+        mainMethod: () => {
+          cancelModal();
+        },
+        secondaryMethod: null,
+        backgroundMethod: (e) => {
+          clickOnBackground(e);
+        }
+      })
     } else if (runningGame === "Stopped") {
-      setTimeout(() => {
-        alert(
-          `Parabéns, você parou o jogo e recebeu ${formatReward(
-            defineReward(numberQuestion - 1)
-          )} irreais`
-        );
-      }, 100);
+      setModalInfo({
+        message: `Parabéns, você parou o jogo e recebeu ${formatReward(
+          defineReward(numberQuestion - 1)
+        )} irreais`,
+        mainButton: "Ok",
+        secondaryButton: null,
+        mainMethod: () => {
+          cancelModal();
+        },
+        secondaryMethod: null,
+        backgroundMethod: (e) => {
+          clickOnBackground(e);
+        }
+      })
     }
   }, [runningGame, numberQuestion]);
 
