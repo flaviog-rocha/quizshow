@@ -73,39 +73,63 @@ function Reward({ Result, Prize }) {
   );
 }
 
-function TimeRemain({remainTime}){
+function TimeRemain({ remainTime }) {
   return (
     <>
       <div className="Time-Counter-Max">
-        <div style={{ height: `${remainTime/45*100}%`}} className="Time-Counter-Remain"></div>
+        <div
+          style={{ height: `${(remainTime / 45) * 100}%`, transition: "1s" }}
+          className="Time-Counter-Remain"
+        ></div>
       </div>
-      <div className="Time-Counter-Label">
-        {remainTime}
-      </div>
+      <div className="Time-Counter-Label">{remainTime}</div>
     </>
-  )
+  );
 }
 
 // function QuestionModal(){
 //   return (
-    
+
 //   )
 // }
 
-function Modal({message, mainButton, secondaryButton, active}){
+function Modal({
+  message,
+  mainButtonMessage,
+  secondaryButtonMessage,
+  mainButtonClick,
+  secondaryButtonClick,
+  backgroundClick,
+}) {
   return (
     <>
-      <div className="Modal-Background" style={{display: `${active ? "flex" : "none"}`}}>
+      <div
+        className="Modal-Background"
+        style={{ display: `${message.length > 0 ? "flex" : "none"}` }}
+        onClick={backgroundClick}
+      >
         <div className="Question-Modal">
-          <div style={{textAlign: "center", fontSize: "1.05rem"}}>{message}</div>
-          <div style={{display: 'flex', flexDirection: 'row-reverse'}}>
-            <button className="Modal-Main-Button">{mainButton}</button>
-            <button className="Modal-Secondary-Button" style={{visibility: `${secondaryButton ? 'visible' : 'hidden'}`}}>{secondaryButton}</button>
+          <div style={{ textAlign: "center", fontSize: "1.05rem" }}>
+            {message}
+          </div>
+          <div style={{ display: "flex", flexDirection: "row-reverse" }}>
+            <button className="Modal-Main-Button" onClick={mainButtonClick}>
+              {mainButtonMessage}
+            </button>
+            <button
+              className="Modal-Secondary-Button"
+              style={{
+                visibility: `${secondaryButtonMessage ? "visible" : "hidden"}`,
+              }}
+              onClick={secondaryButtonClick}
+            >
+              {secondaryButtonMessage}
+            </button>
           </div>
         </div>
       </div>
     </>
-  )
+  );
 }
 function App() {
   const [choicedOption, setChoicedOption] = useState(0);
@@ -125,6 +149,14 @@ function App() {
   ]);
   let [time, setTime] = useState(45);
   const answeredQuestions = useRef([]);
+  const [modalInfo, setModalInfo] = useState({
+    message: "",
+    mainButton: "",
+    secondaryButton: "",
+    mainMethod: null,
+    secondaryMethod: null,
+    backgroundMethod: null,
+  });
 
   const verifyCorrectAnswer = (question) => {
     for (let key in question) {
@@ -138,7 +170,7 @@ function App() {
 
   const defineNextQuestion = (pastQuestions) => {
     let nextQuestion = 0;
-    setTime(45)
+    setTime(45);
     do {
       nextQuestion = Math.floor(Math.random() * questions.length);
     } while (pastQuestions.includes(nextQuestion));
@@ -182,26 +214,37 @@ function App() {
   };
 
   const skipQuestion = () => {
-    skipsCounter();
-
-    //if (runningGame === "Running"){
-      if (runningGame === "Running" && window.confirm("Tem certeza que você deseja pular esta pergunta?")) {
-        let helpsCopy = [...helps];
-        helpsCopy.pop();
-        setHelps(helpsCopy);
-        setRunningGame("Interval");
-        setTimeout(() => {
-          setCurrentQuestion(defineNextQuestion(answeredQuestions.current));
-          setRunningGame("Running");
-        }, 1000);
-      }
+    if (
+      runningGame === "Running"
+    ) {
+      // let helpsCopy = [...helps];
+      // helpsCopy.pop();
+      // setHelps(helpsCopy);
+      // setRunningGame("Interval");
+      // setTimeout(() => {
+      //   setCurrentQuestion(defineNextQuestion(answeredQuestions.current));
+      //   setRunningGame("Running");
+      // }, 1000);
+      setModalInfo({
+        message: "Você tem certeza de que deseja pular a pergunta?",
+        mainButton: "Sim",
+        secondaryButton: "Cancelar",
+        mainMethod: () => {
+          skipQuestionConfirm()
+        },
+        secondaryMethod: () => {
+          cancelModal();
+        },
+        backgroundMethod: (e) => {
+          clickOnBackground(e);
+        }
+      })
+    }
     //}
-    
   };
 
   const skipsCounter = () => {
     let counter = 0;
-
     for (let help of helps) {
       if (help === "Skip") counter++;
     }
@@ -209,45 +252,122 @@ function App() {
     return counter;
   };
 
+  const skipQuestionConfirm = () => {
+    let helpsCopy = [...helps];
+    cancelModal();
+    helpsCopy.pop();
+    setHelps(helpsCopy);
+    setRunningGame("Interval");
+    setTimeout(() => {
+      setCurrentQuestion(defineNextQuestion(answeredQuestions.current));
+      setRunningGame("Running");
+    }, 1000);
+  }
+
+  const cancelModal = () => {
+    setModalInfo({
+      message: "",
+      mainButton: "",
+      secondaryButton: "",
+      mainMethod: null,
+      secondaryMethod: null,
+    });
+  }
+
+  const clickOnBackground = (e) => {
+    if (e.target.classList.contains("Modal-Background")){
+      cancelModal();
+    }
+  }
+
   correctAnswer = verifyCorrectAnswer(questions[currentQuestion]);
+
+  const confirmAnswer = () => {
+    cancelModal();
+
+    if (choicedOption === correctAnswer) {
+      setResult({
+        option: choicedOption,
+        final: "Correct",
+      });
+
+      setRunningGame("Interval");
+      if (numberQuestion < 15) {
+        setTimeout(() => {
+          setChoicedOption(0);
+          setResult("");
+          setCurrentQuestion(
+            defineNextQuestion(answeredQuestions.current)
+          );
+          setNumberQuestion(numberQuestion + 1);
+          setRunningGame("Running");
+        }, 3000);
+      } else {
+        setRunningGame("Win");
+      }
+    } else {
+      setResult({
+        option: choicedOption,
+        final: "Wrong",
+      });
+
+      setRunningGame("Lose");
+    }
+  }
   useEffect(() => {
     if (choicedOption !== 0 && runningGame === "Running") {
+      setModalInfo({
+        message: "Você está certo disso?",
+        mainButton: "Sim",
+        secondaryButton: "Não",
+        mainMethod: () => {
+          skipQuestionConfirm()
+        },
+        secondaryMethod: () => {
+          setChoicedOption(0);
+          cancelModal();
+        },
+        backgroundMethod: (e) => {
+          setChoicedOption(0);
+          clickOnBackground(e);
+        }
+      })
       // Como a aparição da cor na opção selecionada sofre um pequeno delay, é colocado este setTimeout para esperar até que a
       // cor amarela seja devidamente colocada na resposta.
-      setTimeout(() => {
-        if (window.confirm("Você está certo disso?")) {
-          if (choicedOption === correctAnswer) {
-            setResult({
-              option: choicedOption,
-              final: "Correct",
-            });
+      // setTimeout(() => {
+      //   if (window.confirm("Você está certo disso?")) {
+      //     // if (choicedOption === correctAnswer) {
+      //     //   setResult({
+      //     //     option: choicedOption,
+      //     //     final: "Correct",
+      //     //   });
 
-            setRunningGame("Interval");
-            if (numberQuestion < 15) {
-              setTimeout(() => {
-                setChoicedOption(0);
-                setResult("");
-                setCurrentQuestion(
-                  defineNextQuestion(answeredQuestions.current)
-                );
-                setNumberQuestion(numberQuestion + 1);
-                setRunningGame("Running");
-              }, 3000);
-            } else {
-              setRunningGame("Win");
-            }
-          } else {
-            setResult({
-              option: choicedOption,
-              final: "Wrong",
-            });
+      //     //   setRunningGame("Interval");
+      //     //   if (numberQuestion < 15) {
+      //     //     setTimeout(() => {
+      //     //       setChoicedOption(0);
+      //     //       setResult("");
+      //     //       setCurrentQuestion(
+      //     //         defineNextQuestion(answeredQuestions.current)
+      //     //       );
+      //     //       setNumberQuestion(numberQuestion + 1);
+      //     //       setRunningGame("Running");
+      //     //     }, 3000);
+      //     //   } else {
+      //     //     setRunningGame("Win");
+      //     //   }
+      //     // } else {
+      //     //   setResult({
+      //     //     option: choicedOption,
+      //     //     final: "Wrong",
+      //     //   });
 
-            setRunningGame("Lose");
-          }
-        } else {
-          setChoicedOption(0);
-        }
-      }, 50);
+      //     //   setRunningGame("Lose");
+      //     // }
+      //   } else {
+      //     setChoicedOption(0);
+      //   }
+      // }, 50);
     }
   }, [choicedOption, runningGame]);
 
@@ -283,29 +403,39 @@ function App() {
   }, [currentQuestion]);
 
   useEffect(() => {
-    if (numberQuestion === 15){
+    if (numberQuestion === 15) {
       setHelps([]);
     }
-  }, [numberQuestion])
+  }, [numberQuestion]);
 
   useEffect(() => {
     const updateTimer = setInterval(() => {
       setTime((prevTime) => {
-        if (prevTime === 0 || runningGame !== "Running") clearInterval(updateTimer)
+        if (prevTime === 0 || runningGame !== "Running")
+          clearInterval(updateTimer);
 
         if (prevTime === 0) {
           setRunningGame("Lose");
         }
-        return (prevTime > 0 && runningGame === "Running") ? prevTime - 1 : prevTime
-      })
-    }, 1000)
+        return prevTime > 0 && runningGame === "Running"
+          ? prevTime - 1
+          : prevTime;
+      });
+    }, 1000);
 
-    return () => clearInterval(updateTimer)
-  }, [runningGame])
+    return () => clearInterval(updateTimer);
+  }, [runningGame]);
 
   return (
     <Context.Provider value={[choicedOption, setChoicedOption]}>
-      <Modal message={"Deseja realmente pular a pergunta?"} mainButton={"Sim"} secondaryButton={"Não"} />
+      <Modal
+        message={modalInfo.message}
+        mainButtonMessage={modalInfo.mainButton}
+        secondaryButtonMessage={modalInfo.secondaryButton}
+        mainButtonClick={modalInfo.mainMethod}
+        secondaryButtonClick={modalInfo.secondaryMethod}
+        backgroundClick={modalInfo.backgroundMethod}
+      />
       <div style={{ display: "flex", alignItems: "center" }}>
         <div
           style={{
@@ -370,13 +500,7 @@ function App() {
             alignItems: "center",
           }}
         >
-          <TimeRemain remainTime={time}/>
-          {/* <div
-            style={{ height: "60vh", width: "15px", backgroundColor: "#FFF" }}
-          ></div>
-          <div style={{ marginTop: "10px", fontWeight: "900", color: "#FFF" }}>
-            45
-          </div> */}
+          <TimeRemain remainTime={time} />
         </div>
         <div
           style={{

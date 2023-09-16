@@ -229,6 +229,7 @@ Body{
   font-size: 0.95rem;
   padding: 8px;
   margin: 5px;
+  user-select: none;
 }
 
 .Modal-Main-Button{
