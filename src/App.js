@@ -7,6 +7,7 @@ import React, {
 } from "react";
 import "./App.css";
 import questions from "./questions";
+import { motion } from "framer-motion"
 
 const Context = createContext(0);
 let correctAnswer = 2;
@@ -95,14 +96,39 @@ function Modal({
   secondaryButtonClick,
   backgroundClick,
 }) {
+  const [initialY, setInitialY] = useState(-50);
+  const [finalY, setFinalY] = useState(1);
+  const [initialOpacity, setInitialOpacity] = useState(0);
+  const [finalOpacity, setFinalOpacity] = useState(1);
+
+  useEffect(() => {
+    if (!message){
+      setInitialY(1);
+      setFinalY(-50);
+      setInitialOpacity(1)
+      setFinalOpacity(0);
+    }
+
+    else {
+      setInitialY(-50);
+      setFinalY(1);
+      setInitialOpacity(0)
+      setFinalOpacity(1);
+    }
+  }, [message])
+
+
   return (
-    <>
       <div
         className="Modal-Background"
         style={{ display: `${message.length > 0 ? "flex" : "none"}` }}
         onClick={backgroundClick}
       >
-        <div className="Question-Modal">
+        <motion.div 
+          initial={{y: initialY, opacity: initialOpacity}}
+          animate={{y: finalY, opacity: finalOpacity}}
+          transition={{duration: 0.2}}
+          className="Question-Modal">
           <div style={{ textAlign: "center", fontSize: "1.05rem" }}>
             {message}
           </div>
@@ -120,9 +146,8 @@ function Modal({
               {secondaryButtonMessage}
             </button>
           </div>
-        </div>
+        </motion.div>
       </div>
-    </>
   );
 }
 function App() {
