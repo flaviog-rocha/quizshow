@@ -15,17 +15,19 @@ let correctAnswer = 2;
 function Question({ statement, scaleAnimation }) {
   let initialScale = useRef(0);
   let finalScale = useRef(0);
+  let animationType = useRef("spring");
 
   useEffect(() => {
-    //console.log("Mudou pergunta")
     if (scaleAnimation === "In"){
       initialScale.current = 0;
       finalScale.current = 1;
+      animationType.current = "spring";
     }
 
     else {
       initialScale.current = 1;
       finalScale.current = 0;
+      animationType.current = "tween"
     }
   }, [scaleAnimation])
 
@@ -35,7 +37,7 @@ function Question({ statement, scaleAnimation }) {
     className="Question-Area"
     initial={{scale: initialScale.current}}
     animate={animationFinal}
-    transition={{type: "spring"}}
+    transition={{type: animationType.current}}
   >
     {statement}
   </motion.div>;
@@ -45,16 +47,19 @@ function Answer({ optionNumber, alternative, answerResult, playable, scaleAnimat
   let [choicedOption, setChoicedOption] = useContext(Context);
   let initialScale = useRef(0);
   let finalScale = useRef(0);
+  let animationType = useRef("spring");
 
   useEffect(() => {
     if (scaleAnimation === "In"){
       initialScale.current = 0;
       finalScale.current = 1;
+      animationType.current = "spring";
     }
 
     else {
       initialScale.current = 1;
       finalScale.current = 0;
+      animationType.current = "tween"
     }
   }, [scaleAnimation])
 
@@ -77,7 +82,7 @@ function Answer({ optionNumber, alternative, answerResult, playable, scaleAnimat
     <motion.div
       initial={{scale: initialScale.current}}
       animate={{scale: finalScale.current}}
-      transition={{type: "spring"}}
+      transition={{type: animationType.current}}
     >
       <div className="Answer-Component">
         <div
@@ -225,7 +230,7 @@ function App() {
     secondaryMethod: null,
     backgroundMethod: null,
   });
-  const [animateDirection, setAnimateDirection] = useState(Array(5).fill("In"))
+  const [animateDirection, setAnimateDirection] = useState(Array(5).fill(""))
 
   const verifyCorrectAnswer = (question) => {
     for (let key in question) {
@@ -276,20 +281,21 @@ function App() {
     return reward;
   };
 
-  // useEffect(() => {
-  //   // appearNewQuestion("In", 0, animateDirection)
-  //   setAnimateDirection(["In", "In", "In", "In", "In"])
-  // }, [])
+  useEffect(() => {
+    appearNewQuestion("In", 0, animateDirection)
+  }, [])
 
   const appearNewQuestion = (newState, i, animateState) => {
-    animateState[i] = "In";
+    animateState[i] = newState;
     setAnimateDirection([...animateState])
-    i++;
+    
+    if (newState === "In") i++;
+    else if (newState === "Out") i--;
 
     setTimeout(() => {
-      if (i < animateState.length) appearNewQuestion(newState, i, animateState)
+      if ((newState === "In" && i < 6) ||
+      (newState === "Out" && i > -2)) appearNewQuestion(newState, i, animateState)
     }, 100)
-  
   }
   const stopGame = (reward) => {
     setModalInfo({
@@ -381,11 +387,15 @@ function App() {
       setRunningGame("Interval");
       if (numberQuestion < 15) {
         setTimeout(() => {
+          appearNewQuestion("Out", 6, animateDirection)
+        }, 1500)
+        setTimeout(() => {
           setChoicedOption(0);
           setResult("");
           setCurrentQuestion(
             defineNextQuestion(answeredQuestions.current)
           );
+          appearNewQuestion("In", 0, animateDirection)
           setNumberQuestion(numberQuestion + 1);
           setRunningGame("Running");
         }, 3000);
