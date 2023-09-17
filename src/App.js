@@ -12,12 +12,56 @@ import { motion } from "framer-motion"
 const Context = createContext(0);
 let correctAnswer = 2;
 
-function Question({ statement }) {
-  return <div className="Question-Area">{statement}</div>;
+function Question({ statement, scaleAnimation }) {
+  let initialScale = useRef(0);
+  let finalScale = useRef(0);
+  let animationType = useRef("spring");
+
+  useEffect(() => {
+    if (scaleAnimation === "In"){
+      initialScale.current = 0;
+      finalScale.current = 1;
+      animationType.current = "spring";
+    }
+
+    else {
+      initialScale.current = 1;
+      finalScale.current = 0;
+      animationType.current = "tween"
+    }
+  }, [scaleAnimation])
+
+  let animationFinal = {scale: finalScale.current}
+
+  return <motion.div 
+    className="Question-Area"
+    initial={{scale: initialScale.current}}
+    animate={animationFinal}
+    transition={{type: animationType.current}}
+  >
+    {statement}
+  </motion.div>;
 }
 
-function Answer({ optionNumber, alternative, answerResult, playable }) {
+function Answer({ optionNumber, alternative, answerResult, playable, scaleAnimation }) {
   let [choicedOption, setChoicedOption] = useContext(Context);
+  let initialScale = useRef(0);
+  let finalScale = useRef(0);
+  let animationType = useRef("spring");
+
+  useEffect(() => {
+    if (scaleAnimation === "In"){
+      initialScale.current = 0;
+      finalScale.current = 1;
+      animationType.current = "spring";
+    }
+
+    else {
+      initialScale.current = 1;
+      finalScale.current = 0;
+      animationType.current = "tween"
+    }
+  }, [scaleAnimation])
 
   const optionClass = () => {
     if (answerResult.final === "Wrong" && optionNumber === correctAnswer) {
@@ -35,7 +79,11 @@ function Answer({ optionNumber, alternative, answerResult, playable }) {
   };
 
   return (
-    <>
+    <motion.div
+      initial={{scale: initialScale.current}}
+      animate={{scale: finalScale.current}}
+      transition={{type: animationType.current}}
+    >
       <div className="Answer-Component">
         <div
           className={`Answer-Option ${optionClass()}`}
@@ -55,7 +103,7 @@ function Answer({ optionNumber, alternative, answerResult, playable }) {
           {alternative}
         </div>
       </div>
-    </>
+    </motion.div>
   );
 }
 
@@ -78,6 +126,12 @@ function TimeRemain({ remainTime }) {
   return (
     <>
       <div className="Time-Counter-Max">
+        {/* <motion.div
+          initial={{height: '100%'}}
+          animate={{height: 0}}
+          transition={{duration: 45, ease: "linear"}}
+          className="Time-Counter-Remain"
+        ></motion.div> */}
         <div
           style={{ height: `${(remainTime / 45) * 100}%`, transition: "1s" }}
           className="Time-Counter-Remain"
@@ -176,6 +230,7 @@ function App() {
     secondaryMethod: null,
     backgroundMethod: null,
   });
+  const [animateDirection, setAnimateDirection] = useState(Array(5).fill(""))
 
   const verifyCorrectAnswer = (question) => {
     for (let key in question) {
@@ -226,6 +281,22 @@ function App() {
     return reward;
   };
 
+  useEffect(() => {
+    appearNewQuestion("In", 0, animateDirection)
+  }, [])
+
+  const appearNewQuestion = (newState, i, animateState) => {
+    animateState[i] = newState;
+    setAnimateDirection([...animateState])
+    
+    if (newState === "In") i++;
+    else if (newState === "Out") i--;
+
+    setTimeout(() => {
+      if ((newState === "In" && i < 6) ||
+      (newState === "Out" && i > -2)) appearNewQuestion(newState, i, animateState)
+    }, 100)
+  }
   const stopGame = (reward) => {
     setModalInfo({
       message: `Você deseja parar e receber ${reward} irreais?`,
@@ -263,7 +334,6 @@ function App() {
         }
       })
     }
-    //}
   };
 
   const skipsCounter = () => {
@@ -317,11 +387,15 @@ function App() {
       setRunningGame("Interval");
       if (numberQuestion < 15) {
         setTimeout(() => {
+          appearNewQuestion("Out", 6, animateDirection)
+        }, 1500)
+        setTimeout(() => {
           setChoicedOption(0);
           setResult("");
           setCurrentQuestion(
             defineNextQuestion(answeredQuestions.current)
           );
+          appearNewQuestion("In", 0, animateDirection)
           setNumberQuestion(numberQuestion + 1);
           setRunningGame("Running");
         }, 3000);
@@ -449,30 +523,37 @@ function App() {
             width: "50vw",
           }}
         >
-          <Question statement={questions[currentQuestion].question} />
+          <Question 
+            statement={questions[currentQuestion].question}
+            scaleAnimation={animateDirection[0]}
+          />
           <Answer
             optionNumber={1}
             answerResult={result}
             playable={runningGame === "Running"}
             alternative={questions[currentQuestion].option1}
+            scaleAnimation={animateDirection[1]}
           />
           <Answer
             optionNumber={2}
             answerResult={result}
             playable={runningGame === "Running"}
             alternative={questions[currentQuestion].option2}
+            scaleAnimation={animateDirection[2]}
           />
           <Answer
             optionNumber={3}
             answerResult={result}
             playable={runningGame === "Running"}
             alternative={questions[currentQuestion].option3}
+            scaleAnimation={animateDirection[3]}
           />
           <Answer
             optionNumber={4}
             answerResult={result}
             playable={runningGame === "Running"}
             alternative={questions[currentQuestion].option4}
+            scaleAnimation={animateDirection[4]}
           />
           <div className="Rewards-Area">
             <Reward
