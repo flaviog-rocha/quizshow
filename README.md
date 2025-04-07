@@ -13,4 +13,4 @@ Este é um projeto pessoal de um jogo de Quiz baseado no programa de televisão 
 Sim, algumas features não foram implementadas, como as ajudas "Cartas", "Placas" e "Universários". A UX Design também está em andamento.
 
 ## Tecnologias utilizadas
-Para a utilização deste projeto foram utilizadas as seguintes tecnologias: React.js, Typescript, Node.js, gerenciador de pacotes npm.
+Para a utilização deste projeto foram utilizadas as seguintes tecnologias: React.js, Node.js, gerenciador de pacotes npm.
